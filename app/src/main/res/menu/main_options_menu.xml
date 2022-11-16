@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Sort notes according to date modified in ascending order"
+        android:id="@+id/ascending"
+        android:icon="@drawable/up_arrow"
+        app:showAsAction="always"/>
+    <item android:title="Sort notes according to date modified in descending order"
+        android:id="@+id/descending"
+        android:icon="@drawable/down_arrow"
+        app:showAsAction="always"/>
+</menu>
