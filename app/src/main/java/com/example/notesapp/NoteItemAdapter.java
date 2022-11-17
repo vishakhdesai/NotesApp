@@ -87,10 +87,18 @@ public class NoteItemAdapter extends RecyclerView.Adapter<NoteItemAdapter.NoteVi
         }
     }
 
+    public void sortFilter(ArrayList<Note> sortedList){
+        noteArrayList = sortedList;
+        notifyDataSetChanged();
+    }
+
+    public void setFilter(ArrayList<Note> filteredList){
+        noteArrayList = filteredList;
+        notifyDataSetChanged();
+    }
     public interface OnClickListener{
         public void onDeleteClickListener(Note note);
         public void onItemViewClickListener(Note note);
     }
-
 
 }

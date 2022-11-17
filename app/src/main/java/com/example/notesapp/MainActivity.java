@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,9 +23,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements NoteItemAdapter.OnClickListener {
-    boolean sortDescending = true;
+    SearchView searchView;
+    ArrayList<Note> noteArrayList;
+    NoteItemAdapter noteItemAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +40,21 @@ public class MainActivity extends AppCompatActivity implements NoteItemAdapter.O
         getSupportActionBar().setTitle("Notes");
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         FloatingActionButton addNewNoteButton = findViewById(R.id.addNewNoteButton);
+        searchView = findViewById(R.id.searchView);
+        searchView.clearFocus();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                filterList(s);
+                return true;
+            }
+        });
         addNewNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -45,36 +64,28 @@ public class MainActivity extends AppCompatActivity implements NoteItemAdapter.O
         });
 
         DBHelper dbHelper = new DBHelper(MainActivity.this);
-        ArrayList<Note> noteArrayList = dbHelper.getNotes();
-        Intent intent = getIntent();
-        if(intent.hasExtra("sortDescending")){
-            sortDescending = intent.getExtras().getBoolean("sortDescending");
-        }
-        if (sortDescending){
-            Collections.sort(noteArrayList, new Comparator<Note>() {
-                @Override
-                public int compare(Note note, Note t1) {
-                    String formattedTime1 = DateFormat.getDateTimeInstance().format(note.getCreatedTime());
-                    String formattedTime2 = DateFormat.getDateTimeInstance().format(t1.getCreatedTime());
-                    return formattedTime2.compareToIgnoreCase(formattedTime1);
-                }
-            });
-        }
-        else {
-            Collections.sort(noteArrayList, new Comparator<Note>() {
-                @Override
-                public int compare(Note note, Note t1) {
-                    String formattedTime1 = DateFormat.getDateTimeInstance().format(note.getCreatedTime());
-                    String formattedTime2 = DateFormat.getDateTimeInstance().format(t1.getCreatedTime());
-                    return formattedTime1.compareToIgnoreCase(formattedTime2);
-                }
-            });
-        }
+        noteArrayList = dbHelper.getNotes();
         RecyclerView recyclerView = findViewById(R.id.recyclerview);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        NoteItemAdapter noteItemAdapter = new NoteItemAdapter(getApplicationContext(), noteArrayList, this);
+        noteItemAdapter = new NoteItemAdapter(getApplicationContext(), noteArrayList, this);
         recyclerView.setAdapter(noteItemAdapter);
+    }
+
+    private void filterList(String s) {
+        ArrayList<Note> filteredNotes = new ArrayList<Note>();
+        for (Note note: noteArrayList) {
+            if(note.getTitle().toLowerCase().contains(s)){
+                filteredNotes.add(note);
+            }
+        }
+
+        if (filteredNotes.isEmpty()){
+            Toast.makeText(this, "No match found", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            noteItemAdapter.setFilter(filteredNotes);
+        }
     }
 
     @Override
@@ -107,22 +118,26 @@ public class MainActivity extends AppCompatActivity implements NoteItemAdapter.O
         int id = item.getItemId();
 
         if(id == R.id.ascending){
-            sortDescending = false;
-            finish();
-            overridePendingTransition(0, 0);
-            Intent i = getIntent();
-            i.putExtra("sortDescending", false);
-            startActivity(i);
-            overridePendingTransition(0, 0);
+            Collections.sort(noteArrayList, new Comparator<Note>() {
+                @Override
+                public int compare(Note note, Note t1) {
+                    String formattedTime1 = DateFormat.getDateTimeInstance().format(note.getCreatedTime());
+                    String formattedTime2 = DateFormat.getDateTimeInstance().format(t1.getCreatedTime());
+                    return formattedTime1.compareToIgnoreCase(formattedTime2);
+                }
+            });
+            noteItemAdapter.notifyDataSetChanged();
         }
         else if(id == R.id.descending){
-            sortDescending = true;
-            finish();
-            overridePendingTransition(0, 0);
-            Intent i = getIntent();
-            i.putExtra("sortDescending", true);
-            startActivity(i);
-            overridePendingTransition(0, 0);
+            Collections.sort(noteArrayList, new Comparator<Note>() {
+                @Override
+                public int compare(Note note, Note t1) {
+                    String formattedTime1 = DateFormat.getDateTimeInstance().format(note.getCreatedTime());
+                    String formattedTime2 = DateFormat.getDateTimeInstance().format(t1.getCreatedTime());
+                    return formattedTime2.compareToIgnoreCase(formattedTime1);
+                }
+            });
+            noteItemAdapter.notifyDataSetChanged();
         }
         return super.onOptionsItemSelected(item);
     }

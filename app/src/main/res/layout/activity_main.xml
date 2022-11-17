@@ -7,12 +7,22 @@
     android:background="#A55EC2EF"
     android:padding="10dp"
     tools:context=".MainActivity">
-
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_alignParentTop="true"
+        android:queryHint="Search Notes..."
+        android:background="@drawable/search_view_bg"
+        android:iconifiedByDefault="false"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/searchView"
         android:layout_above="@id/addNewNoteButton" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
